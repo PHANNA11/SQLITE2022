@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
-
+import 'dart:typed_data';
+import 'package:flutter/cupertino.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:project_sqlite_2022/data/conn.dart';
 import 'package:project_sqlite_2022/list_user.dart';
 import 'package:project_sqlite_2022/model/userdata.dart';
@@ -38,6 +43,10 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController controllerUser = TextEditingController();
   TextEditingController controllerPass = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  late String _base64Image;
+  late File _image;
+  // ignore: unused_field
+  late Uint8List _bytesImage;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,6 +58,73 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Stack(
+                children: [
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          // ignore: unnecessary_null_comparison
+                          image: NetworkImage('url'),
+                        )),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    height: 40,
+                    width: 40,
+                    child: InkWell(
+                      onTap: () {
+                        showMaterialModalBottomSheet(
+                          context: context,
+                          builder: (context) => SingleChildScrollView(
+                            controller: ModalScrollController.of(context),
+                            child: Container(
+                              height: 120,
+                              color: Colors.white,
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: const [
+                                  Text('data'),
+                                  // ListTileWidget(
+                                  //     icon: (Icons.linked_camera_sharp),
+                                  //     label: 'Select Camera',
+                                  //     onTap: () {
+                                  //       _openCamera();
+                                  //     }),
+                                  // ListTileWidget(
+                                  //     icon: (Icons.collections),
+                                  //     label: 'Select Phone',
+                                  //     onTap: () {
+                                  //       _openGallery();
+                                  //     }),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                          height: 80,
+                          width: 80,
+                          //  color: Colors.red,
+                          // alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(40)),
+                          child: const Icon(
+                            Icons.camera_alt_outlined,
+                            size: 35,
+                          )),
+                    ),
+                  )
+                ],
+              ),
               TextFormField(
                 controller: controllerUser,
                 validator: (value) {
@@ -97,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ListUserPage(),
+                                  builder: (context) => const ListUserPage(),
                                 ),
                               ),
                             );
@@ -119,5 +195,24 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       )),
     );
+  }
+
+  Future<void> _openGallery() async {
+    // ignore: deprecated_member_use
+
+    // var image2 = await ImagePicker.pickImage(source: ImageSource.gallery);
+    // List<int> imageBytes = image2.readAsBytesSync();
+    // _base64Image = base64Encode(imageBytes);
+    // _bytesImage = const Base64Decoder().convert(_base64Image);
+    // setState(() => _image = image2);
+  }
+
+  Future<void> _openCamera() async {
+    // // ignore: deprecated_member_use
+    // var image2 = await ImagePicker.pickImage(source: ImageSource.camera);
+    // List<int> imageBytes = image2.readAsBytesSync();
+    // _base64Image = base64Encode(imageBytes);
+    // _bytesImage = const Base64Decoder().convert(_base64Image);
+    // setState(() => _image = image2);
   }
 }
