@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:project_sqlite_2022/data/conn.dart';
 import 'package:project_sqlite_2022/list_user.dart';
 import 'package:project_sqlite_2022/model/userdata.dart';
@@ -44,11 +42,73 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController controllerPass = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late String _base64Image;
-  late File _image;
+  PickedFile? _image;
   // ignore: unused_field
   late Uint8List _bytesImage;
   @override
   Widget build(BuildContext context) {
+    // ===== Funtion Camera and gallary ====
+
+    Future getImagefromCamera() async {
+      final image = await ImagePicker.platform
+          .pickImage(source: ImageSource.camera, imageQuality: 100);
+
+      setState(() {
+        _image = image!;
+      });
+    }
+
+    Future getImagefromaGallary() async {
+      final image =
+          await ImagePicker.platform.pickImage(source: ImageSource.gallery);
+      setState(() {
+        _image = image!;
+      });
+    }
+
+    //==== Function Alert Dialog ====
+    Future<void> _showDialog(BuildContext context) async {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: [
+                    Builder(
+                      builder: (context) {
+                        return const Divider(
+                          color: Colors.blueAccent,
+                          height: 2,
+                        );
+                      },
+                    ),
+                    ListTile(
+                      onTap: () {
+                        getImagefromaGallary();
+                        Navigator.pop(context);
+                      },
+                      subtitle: const Text('Gallary'),
+                    ),
+                    const Divider(
+                      color: Colors.pinkAccent,
+                      height: 2,
+                    ),
+                    ListTile(
+                      onTap: () {
+                        getImagefromCamera();
+                        Navigator.pop(context);
+                      },
+                      subtitle: const Text('Camera'),
+                    )
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+
+    //==========================
     return Scaffold(
       // backgroundColor: Colors.blue,
       body: SafeArea(
@@ -64,64 +124,46 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 100,
                     width: 100,
                     decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          // ignore: unnecessary_null_comparison
-                          image: NetworkImage('url'),
-                        )),
+                      shape: BoxShape.circle,
+                      color: Colors.green,
+                      // image:DecorationImage(
+                      //   filterQuality: 200,
+                      // ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: _image == null
+                          ? Image.asset('assets/images/boy.png')
+                          : Image.file(
+                              File(_image!.path),
+                              fit: BoxFit.cover,
+                            ),
+                    ),
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
                     height: 40,
                     width: 40,
-                    child: InkWell(
-                      onTap: () {
-                        showMaterialModalBottomSheet(
-                          context: context,
-                          builder: (context) => SingleChildScrollView(
-                            controller: ModalScrollController.of(context),
-                            child: Container(
-                              height: 120,
-                              color: Colors.white,
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text('data'),
-                                  // ListTileWidget(
-                                  //     icon: (Icons.linked_camera_sharp),
-                                  //     label: 'Select Camera',
-                                  //     onTap: () {
-                                  //       _openCamera();
-                                  //     }),
-                                  // ListTileWidget(
-                                  //     icon: (Icons.collections),
-                                  //     label: 'Select Phone',
-                                  //     onTap: () {
-                                  //       _openGallery();
-                                  //     }),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                          height: 80,
-                          width: 80,
-                          //  color: Colors.red,
-                          // alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(40)),
-                          child: const Icon(
+                    child: Container(
+                        height: 80,
+                        width: 80,
+                        //  color: Colors.red,
+                        // alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(40)),
+                        child: IconButton(
+                          icon: const Icon(
                             Icons.camera_alt_outlined,
                             size: 35,
-                          )),
-                    ),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _showDialog(context);
+                            });
+                          },
+                        )),
                   )
                 ],
               ),
@@ -168,7 +210,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             .insertUser(User(
                                 id: Random().nextInt(100),
                                 name: controllerUser.text.trim(),
-                                password: controllerPass.text.trim()))
+                                password: controllerPass.text.trim(),
+                                pic: _image!.path))
                             .whenComplete(
                               () => Navigator.push(
                                 context,
@@ -195,24 +238,5 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       )),
     );
-  }
-
-  Future<void> _openGallery() async {
-    // ignore: deprecated_member_use
-
-    // var image2 = await ImagePicker.pickImage(source: ImageSource.gallery);
-    // List<int> imageBytes = image2.readAsBytesSync();
-    // _base64Image = base64Encode(imageBytes);
-    // _bytesImage = const Base64Decoder().convert(_base64Image);
-    // setState(() => _image = image2);
-  }
-
-  Future<void> _openCamera() async {
-    // // ignore: deprecated_member_use
-    // var image2 = await ImagePicker.pickImage(source: ImageSource.camera);
-    // List<int> imageBytes = image2.readAsBytesSync();
-    // _base64Image = base64Encode(imageBytes);
-    // _bytesImage = const Base64Decoder().convert(_base64Image);
-    // setState(() => _image = image2);
   }
 }

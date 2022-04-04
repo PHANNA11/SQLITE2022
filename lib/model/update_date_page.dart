@@ -7,12 +7,17 @@ import 'package:project_sqlite_2022/model/userdata.dart';
 
 class UpdatePage extends StatefulWidget {
   UpdatePage(
-      {required this.id, required this.User, required this.pass, Key? key})
+      {required this.id,
+      required this.User,
+      required this.pass,
+      required this.pic,
+      Key? key})
       : super(key: key);
 
   String User;
   int id;
   String pass;
+  String pic;
 
   @override
   State<UpdatePage> createState() => _UpdatePageState();
@@ -88,7 +93,8 @@ class _UpdatePageState extends State<UpdatePage> {
                             .updateUser(User(
                                 id: widget.id,
                                 name: controllerUser.text.trim(),
-                                password: controllerPass.text.trim()))
+                                password: controllerPass.text.trim(),
+                                pic: widget.pic))
                             .whenComplete(() => Navigator.pushAndRemoveUntil(
                                 context,
                                 MaterialPageRoute(

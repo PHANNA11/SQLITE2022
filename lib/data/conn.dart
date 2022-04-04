@@ -11,7 +11,7 @@ class ConnectionDB {
       join(path, 'tododatabase.db'),
       onCreate: (database, version) async {
         await database.execute(
-          'CREATE TABLE $table(id INTEGER PRIMARY KEY, name TEXT, password TEXT)',
+          'CREATE TABLE $table(id INTEGER PRIMARY KEY, name TEXT, password TEXT,pic BLOB)',
         );
       },
       version: 1,

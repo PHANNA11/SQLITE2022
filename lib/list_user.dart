@@ -78,9 +78,11 @@ class _ListUserPageState extends State<ListUserPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => UpdatePage(
-                                    id: items[index].id,
-                                    User: items[index].name,
-                                    pass: items[index].password),
+                                  id: items[index].id,
+                                  User: items[index].name,
+                                  pass: items[index].password,
+                                  pic: items[index].pic,
+                                ),
                               ));
                         });
                       },
