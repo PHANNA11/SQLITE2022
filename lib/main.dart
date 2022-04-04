@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController controllerPass = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   late String _base64Image;
-  PickedFile? _image;
+  File? _image;
   // ignore: unused_field
   late Uint8List _bytesImage;
   @override
@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
           .pickImage(source: ImageSource.camera, imageQuality: 100);
 
       setState(() {
-        _image = image!;
+        _image = File(image!.path);
       });
     }
 
@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final image =
           await ImagePicker.platform.pickImage(source: ImageSource.gallery);
       setState(() {
-        _image = image!;
+        _image = File(image!.path);
       });
     }
 
@@ -112,131 +112,150 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       // backgroundColor: Colors.blue,
       body: SafeArea(
-          child: Form(
-        key: _formKey,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                children: [
-                  Container(
-                    height: 100,
-                    width: 100,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.green,
-                      // image:DecorationImage(
-                      //   filterQuality: 200,
-                      // ),
+        child: Form(
+          key: _formKey,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Stack(
+                  children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                        //image: AssetImage(assetName)
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(3),
+                        child: _image == null
+                            ? Image.asset('assets/images/boy.png')
+                            : Image.file(
+                                File(_image!.path),
+                                fit: BoxFit.cover,
+                              ),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: _image == null
-                          ? Image.asset('assets/images/boy.png')
-                          : Image.file(
-                              File(_image!.path),
-                              fit: BoxFit.cover,
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      height: 40,
+                      width: 40,
+                      child: Container(
+                          height: 80,
+                          width: 80,
+                          //  color: Colors.red,
+                          // alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(40)),
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.camera_alt_outlined,
+                              size: 35,
                             ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    height: 40,
-                    width: 40,
-                    child: Container(
-                        height: 80,
-                        width: 80,
-                        //  color: Colors.red,
-                        // alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(40)),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.camera_alt_outlined,
-                            size: 35,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _showDialog(context);
-                            });
-                          },
-                        )),
-                  )
-                ],
-              ),
-              TextFormField(
-                controller: controllerUser,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "please Enter Username";
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                    hintText: 'Enter username',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              TextFormField(
-                controller: controllerPass,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "please Enter password";
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                    hintText: 'Enter password',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Center(
+                            onPressed: () {
+                              setState(() {
+                                _showDialog(context);
+                              });
+                            },
+                          )),
+                    )
+                  ],
+                ),
+                TextFormField(
+                  controller: controllerUser,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return "please Enter Username";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                      hintText: 'Enter username',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  controller: controllerPass,
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return "please Enter password";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                      hintText: 'Enter password',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Center(
                   child: Container(
-                height: 50,
-                width: 100,
-                child: ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        await ConnectionDB()
-                            .insertUser(User(
-                                id: Random().nextInt(100),
-                                name: controllerUser.text.trim(),
-                                password: controllerPass.text.trim(),
-                                pic: _image!.path))
-                            .whenComplete(
-                              () => Navigator.push(
+                    height: 50,
+                    width: 100,
+                    child: ElevatedButton(
+                        onPressed: () async {
+                          // var tempItem = upload();
+                          if (_formKey.currentState!.validate()) {
+                            await ConnectionDB()
+                                .insertUser(User(
+                                    id: Random().nextInt(100),
+                                    name: controllerUser.text.trim(),
+                                    password: controllerPass.text.trim(),
+                                    pic: _image!.path))
+                                .whenComplete(
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ListUserPage(),
+                                    ),
+                                  ),
+                                );
+                            print('insert Success');
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Processing Data Insert')));
+                          } else {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text('Processing Data Insert'),
+                            ));
+                          }
+                        },
+                        child: const Text('Save')),
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Center(
+                    child: Container(
+                  height: 50,
+                  width: 100,
+                  child: ElevatedButton(
+                      onPressed: () async {
+                        await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const ListUserPage(),
-                                ),
-                              ),
-                            );
-                        print('insert Success');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Processing Data Insert')));
-                      } else {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Processing Data Insert'),
-                        ));
-                      }
-                    },
-                    child: const Text('Save')),
-              ))
-            ],
+                                    builder: (context) => const ListUserPage()))
+                            .whenComplete(() => this);
+                      },
+                      child: const Text('View List')),
+                ))
+              ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 }

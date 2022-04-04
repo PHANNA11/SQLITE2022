@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:project_sqlite_2022/data/conn.dart';
 import 'package:project_sqlite_2022/list_user.dart';
 import 'package:project_sqlite_2022/model/userdata.dart';
@@ -28,12 +30,73 @@ class _UpdatePageState extends State<UpdatePage> {
   TextEditingController controllerUser = TextEditingController();
   TextEditingController controllerPass = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  File? _image;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     controllerUser.text = widget.User;
     controllerPass.text = widget.pass;
+    _image = File(widget.pic);
+  }
+
+  Future getImagefromCamera() async {
+    final image = await ImagePicker.platform
+        .pickImage(source: ImageSource.camera, imageQuality: 100);
+
+    setState(() {
+      _image = File(image!.path);
+    });
+  }
+
+  Future getImagefromaGallary() async {
+    final image =
+        await ImagePicker.platform.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image = File(image!.path);
+    });
+  }
+
+  //==== Function Alert Dialog ====
+  Future<void> _showDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: [
+                  Builder(
+                    builder: (context) {
+                      return const Divider(
+                        color: Colors.blueAccent,
+                        height: 2,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    onTap: () {
+                      getImagefromaGallary();
+                      Navigator.pop(context);
+                    },
+                    subtitle: const Text('Gallary'),
+                  ),
+                  const Divider(
+                    color: Colors.pinkAccent,
+                    height: 2,
+                  ),
+                  ListTile(
+                    onTap: () {
+                      getImagefromCamera();
+                      Navigator.pop(context);
+                    },
+                    subtitle: const Text('Camera'),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 
   @override
@@ -50,6 +113,56 @@ class _UpdatePageState extends State<UpdatePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Stack(
+                children: [
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.green,
+                      image: DecorationImage(
+                        image: FileImage(_image!),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // child: Padding(
+                    //   padding: const EdgeInsets.all(3),
+                    //   child: _image == null
+                    //       ? Image.asset('assets/images/boy.png')
+                    //       : Image.file(
+                    //           File(_image!.path),
+                    //           fit: BoxFit.cover,
+                    //         ),
+                    // ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    height: 40,
+                    width: 40,
+                    child: Container(
+                        height: 80,
+                        width: 80,
+                        //  color: Colors.red,
+                        // alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(40)),
+                        child: IconButton(
+                          icon: const Icon(
+                            Icons.camera_alt_outlined,
+                            size: 35,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _showDialog(context);
+                            });
+                          },
+                        )),
+                  )
+                ],
+              ),
               TextFormField(
                 controller: controllerUser,
                 validator: (value) {

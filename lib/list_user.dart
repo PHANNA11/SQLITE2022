@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:project_sqlite_2022/data/conn.dart';
 import 'package:project_sqlite_2022/model/update_date_page.dart';
@@ -25,6 +27,9 @@ class _ListUserPageState extends State<ListUserPage> {
       });
     });
   }
+  // Future getImage(){
+
+  // }
 
   Future<void> _onRefresh() async {
     setState(() {
@@ -36,6 +41,8 @@ class _ListUserPageState extends State<ListUserPage> {
   Future<List<User>> getList() async {
     return await db.getUser();
   }
+
+  File? image;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +71,7 @@ class _ListUserPageState extends State<ListUserPage> {
               child: ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
+                  image = File(items[index].pic);
                   return Dismissible(
                     direction: DismissDirection.endToStart,
                     background: Container(color: Colors.red),
@@ -89,12 +97,14 @@ class _ListUserPageState extends State<ListUserPage> {
                       child: Card(
                         child: ListTile(
                           leading: CircleAvatar(
-                            child: Text(items[index].id.toString()),
+                            backgroundImage: FileImage(image!),
                           ),
                           title: Text(
                             items[index].name,
                             style: const TextStyle(fontSize: 20),
                           ),
+                          subtitle:
+                              Text("User ID:" + items[index].id.toString()),
                         ),
                       ),
                     ),
